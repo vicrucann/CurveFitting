@@ -69,7 +69,7 @@ osg::Node* createTestScene()
     osg::ref_ptr<osg::Vec3Array> path = createDataPoints();
     OsgPathFitter<osg::Vec3Array, osg::Vec3f, float> fitter;
     fitter.init(*path);
-    float tolerance = 0.05f;
+    float tolerance = 10.f;
     osg::ref_ptr<osg::Vec3Array> curves = fitter.fit(tolerance);
 
     osg::ref_ptr<osg::Vec3Array> sampled = drawCurves(curves.get());

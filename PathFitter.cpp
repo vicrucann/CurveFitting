@@ -68,61 +68,62 @@ void PathFitter<Container, Point2, Real>::fitCubic(Container *curvesSet, Real er
 
     /* 4 iterations */
     for (int i=0; i<=4; ++i){
-        Curve curve = this->generateBezier(first, last, uPrime, tan1, tan2);
+        Curve bezier = this->generateBezier(first, last, uPrime, tan1, tan2);
 
-        int index;
-        auto merr = this->findMaxError(first, last, curve, uPrime, index);
-        if (merr < error && parametersInOrder){
-            this->addCurve(curvesSet, curve);
+        /* Find max deviation of points to fitted curve */
+        auto max = this->findMaxError(first, last, bezier, uPrime);
+        if (max.first < error && parametersInOrder){
+            this->addCurve(curvesSet, bezier);
             return;
         }
 
-        split = index;
-        if (merr >= maxError)
+        split = max.second;
+        if (max.first >= maxError)
             break;
 
-        parametersInOrder = this->reparameterize(first, last, uPrime, curve);
-        maxError = merr;
+        parametersInOrder = this->reparameterize(first, last, uPrime, bezier);
+        maxError = max.first;
     }
 
-    /* fitting failed */
+    /* fitting failed - split at max error and fit recursively */
     auto tanCenter = m_dataPoints.at(split-1) - m_dataPoints.at(split+1);
+    tanCenter.normalize();
     this->fitCubic(curvesSet, error, first, split, tan1, tanCenter);
     this->fitCubic(curvesSet, error, split, last, -tanCenter, tan2 );
 }
 
 template <typename Container, typename Point2, typename Real>
-void PathFitter<Container, Point2, Real>::addCurve(Container *curvesSet, const Curve &curve)
+void PathFitter<Container, Point2, Real>::addCurve(Container *curvesSet, const Curve &bezier)
 {
-    curvesSet->push_back( curve[0] );
-    curvesSet->push_back( curve[1] );
-    curvesSet->push_back( curve[2] );
-    curvesSet->push_back( curve[3] );
+    curvesSet->push_back( bezier[0] );
+    curvesSet->push_back( bezier[1] );
+    curvesSet->push_back( bezier[2] );
+    curvesSet->push_back( bezier[3] );
 }
 
 template <typename Container, typename Point2, typename Real>
 typename PathFitter<Container, Point2, Real>::Curve PathFitter<Container, Point2, Real>::generateBezier(int first, int last, const std::vector<Real> &uPrime, const Point2 &tan1, const Point2 &tan2)
 {
-    double epsilon = 1.0e-6;
+    auto epsilon = 1.0e-6;
     auto pt1 = m_dataPoints[first];
     auto pt2 = m_dataPoints[last];
 
-    // C and X matrices
-    Real C[2][2];
-    Real X[2];
+    /* C and X matrices */
+    Real C[2][2] = {{0,0}, {0,0}};
+    Real X[2] = {0,0};
 
-    for (int i=0, l=last-first+1; i<l; ++i){
-        auto u = uPrime.at(i);
-        auto t = 1-u,
-                b = 3*u*t,
+    for (auto i=0, l=last-first+1; i<l; ++i){
+        auto u = uPrime[i];
+        auto    t = 1 - u,
+                b = 3 * u * t,
                 b0 = t * t * t,
                 b1 = b * t,
                 b2 = b * u,
                 b3 = u * u * u;
-        auto a1 = tan1 * b1,
+        auto    a1 = tan1 * b1,
                 a2 = tan2 * b2,
                 tmp = m_dataPoints[first+i] - (pt1 * (b0 + b1)) - (pt2 * (b2 + b3)) ;
-        C[0][0] += a1 * a2;
+        C[0][0] += a1 * a1;
         C[0][1] += a1 * a2;
         C[1][0] = C[0][1];
         C[1][1] += a2 * a2;
@@ -135,8 +136,8 @@ typename PathFitter<Container, Point2, Real>::Curve PathFitter<Container, Point2
     Real alpha1, alpha2;
     if (std::fabs(detC0C1) > epsilon){
         /* Kramer's rule */
-        auto detC0X = C[0][0] * X[1] - C[1][0] * X[0];
-        auto detXC1 = X[0] * C[1][1] - X[1] * C[0][1];
+        auto detC0X = C[0][0] * X[1] -      C[1][0] *   X[0];
+        auto detXC1 = X[0] *    C[1][1] -   X[1] *      C[0][1];
 
         /* alpha values */
         alpha1 = detXC1 / detC0C1;
@@ -155,32 +156,40 @@ typename PathFitter<Container, Point2, Real>::Curve PathFitter<Container, Point2
 
     }
 
+     /* If alpha negative, use the Wu/Barsky heuristic
+      * (if alpha is 0, you get coincident control points that lead to divide by zero in any subsequent
+      * findRoot() call. */
     auto segLength = this->getDistance(pt2, pt1);
     auto eps = epsilon * segLength;
     Point2 handle1, handle2;
-    if (alpha1 < eps || alpha2 < eps)
+    if (alpha1 < eps || alpha2 < eps) {
+        /* fall back on standard (probably inaccurate) formula, and subdivide further if needed. */
         alpha1 = alpha2 = segLength / 3.f;
+    }
     else {
+        /* Check if the found control points are in the right order when projected onto the line through pt1 and pt2. */
         auto line = pt2 - pt1;
+        /* Control points 1 and 2 are positioned at alpha distance out on the tangent vectors, left and right, respectively */
         handle1 = tan1 * alpha1;
         handle2 = tan2 * alpha2;
         if (handle1 * line - handle2 * line > segLength * segLength ){
+            /* Fall back to the Wu/Barsky heuristic above */
             alpha1 = alpha2 = segLength / 3.f;
             handle1 = handle2 = getNANPoint();
         }
     }
 
-    auto pta = handle1.isNaN()? pt1+tan1*alpha1 : pt1+handle1;
-    auto ptb = handle2.isNaN() ? pt2 + tan2 * alpha2 : pt2 + handle2;
+    auto pta = handle1.isNaN() ? (pt1 + tan1 * alpha1) : (pt1 + handle1);
+    auto ptb = handle2.isNaN() ? (pt2 + tan2 * alpha2) : (pt2 + handle2);
 
     return Curve{pt1, pta, ptb, pt2};
 }
 
 template <typename Container, typename Point2, typename Real>
-bool PathFitter<Container, Point2, Real>::reparameterize(int first, int last, std::vector<Real> &u, const Curve &curve)
+bool PathFitter<Container, Point2, Real>::reparameterize(int first, int last, std::vector<Real> &u, const Curve &bezier)
 {
     for (int i=first; i<=last; ++i){
-        u[i-first] = this->findRoot(curve, m_dataPoints[i], u[i-first]);
+        u[i-first] = this->findRoot(bezier, m_dataPoints[i], u[i-first]);
     }
 
     for (int i=1, l=u.size(); i<l; ++i ){
@@ -191,14 +200,14 @@ bool PathFitter<Container, Point2, Real>::reparameterize(int first, int last, st
 }
 
 template <typename Container, typename Point2, typename Real>
-Real PathFitter<Container, Point2, Real>::findRoot(const Curve &curve, const Point2 &point, Real u)
+Real PathFitter<Container, Point2, Real>::findRoot(const Curve &bezier, const Point2 &point, Real u)
 {
     Curve curve1(3);
     Curve curve2(2);
 
     /* control vertices for Q' */
     for (int i=0; i<=2; ++i){
-        curve1[i] = (curve[i+1] - curve[i]) * 3.f;
+        curve1[i] = (bezier[i+1] - bezier[i]) * 3.f;
     }
 
     /* control vertices for Q'' */
@@ -207,11 +216,11 @@ Real PathFitter<Container, Point2, Real>::findRoot(const Curve &curve, const Poi
     }
 
     /* compute Q(u), Q'(u) and Q''(u) */
-    auto pt = this->evaluate(3, curve, u);
+    auto pt = this->evaluate(3, bezier, u);
     auto pt1 = this->evaluate(2, curve1, u);
     auto pt2 = this->evaluate(1, curve2, u);
     auto diff = pt - point;
-    auto df = pt1 * pt1 + diff * pt2;
+    auto df = pt1 * pt1 + diff * pt2; // sum of dot products
 
     /* f(u) / f'(u) */
     if (std::fabs(df) < 1.0e-6)
@@ -222,9 +231,9 @@ Real PathFitter<Container, Point2, Real>::findRoot(const Curve &curve, const Poi
 }
 
 template <typename Container, typename Point2, typename Real>
-Point2 PathFitter<Container, Point2, Real>::evaluate(int degree, const Curve &curve, Real t)
+Point2 PathFitter<Container, Point2, Real>::evaluate(int degree, const Curve &bezier, Real t)
 {
-    Curve tmp(curve);
+    Curve tmp(bezier);
 
     /* triangle computation */
     for (int i=1; i<=degree; ++i){
@@ -252,12 +261,12 @@ std::vector<Real> PathFitter<Container, Point2, Real>::chordLengthParameterize(i
 }
 
 template <typename Container, typename Point2, typename Real>
-Real PathFitter<Container, Point2, Real>::findMaxError(int first, int last, const Curve &curve, const std::vector<Real> &u, int &index)
+std::pair<Real, int> PathFitter<Container, Point2, Real>::findMaxError(int first, int last, const Curve &bezier, const std::vector<Real> &u)
 {
-    index = std::floor((last-first+1)/2);
+    int index = std::floor((last-first+1)/2);
     Real maxDist = 0;
     for (int i=first+1; i<last; ++i){
-        auto P = this->evaluate(3, curve, u.at(i-first));
+        auto P = this->evaluate(3, bezier, u.at(i-first));
         auto v = P - m_dataPoints[i];
         auto dist = v.length2(); // squared distance
         if (dist >= maxDist){
@@ -265,5 +274,5 @@ Real PathFitter<Container, Point2, Real>::findMaxError(int first, int last, cons
             index = i;
         }
     }
-    return maxDist;
+    return {maxDist, index};
 }
