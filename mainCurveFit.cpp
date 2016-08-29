@@ -55,11 +55,11 @@ osg::Vec3Array* createDataPoints()
     osg::ref_ptr<osg::Vec3Array> curve = new osg::Vec3Array;
 
     curve->push_back(osg::Vec3f(0,0,0));
-    curve->push_back(osg::Vec3f(1,0,0));
-    curve->push_back(osg::Vec3f(0,0,1));
-    curve->push_back(osg::Vec3f(1,0,1));
+    curve->push_back(osg::Vec3f(2,0,12));
+    curve->push_back(osg::Vec3f(40,0,28));
+    curve->push_back(osg::Vec3f(40,0,4));
 
-    osg::ref_ptr<osg::Vec3Array> sampled = drawCurves(curve, 6);
+    osg::ref_ptr<osg::Vec3Array> sampled = drawCurves(curve, 60);
 
     return sampled.release();
 }
@@ -69,13 +69,15 @@ osg::Node* createTestScene()
     osg::ref_ptr<osg::Vec3Array> path = createDataPoints();
     OsgPathFitter<osg::Vec3Array, osg::Vec3f, float> fitter;
     fitter.init(*path);
-    float tolerance = 10.f;
+
+    /* threshold: prefer to set it automatically depending on size of bounding box
+     * in order to avoid under- and over-fitting. Here, we will set it fixed */
+    float tolerance = 1.f;
     osg::ref_ptr<osg::Vec3Array> curves = fitter.fit(tolerance);
 
-    osg::ref_ptr<osg::Vec3Array> sampled = drawCurves(curves.get());
-    qDebug() << "path=" << path->size();
-    qDebug() << "curves=" << curves->size();
-    qDebug() << "sampled=" << sampled->size();
+    osg::ref_ptr<osg::Vec3Array> sampled = drawCurves(curves.get(), 15);
+    qDebug() << "path.segments=" << path->size()/4;
+    qDebug() << "curves.segments=" << curves->size()/4;
 
     osg::Vec4Array* colors = new osg::Vec4Array;
     colors->push_back(osg::Vec4(0.3,0.9,0,1));
