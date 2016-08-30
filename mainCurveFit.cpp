@@ -124,6 +124,5 @@ int main(int, char**)
     root->addChild(createTestScene());
     viewer.setSceneData(root.get());
     viewer.setUpViewInWindow(100,100,OSG_WIDTH, OSG_HEIGHT);
-//    viewer.setUpViewOnSingleScreen(0);
     return viewer.run();
 }
