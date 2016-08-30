@@ -14,7 +14,7 @@
 #include <osg/LineWidth>
 #include <osg/BlendFunc>
 
-#include "OsgPathFitter.h"
+#include "libPathFitter/OsgPathFitter.h"
 
 const int OSG_WIDTH = 1280;
 const int OSG_HEIGHT = 960;

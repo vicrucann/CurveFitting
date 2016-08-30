@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 2.8.11)
+
+if(POLICY CMP0020)
+    CMAKE_POLICY(SET CMP0020 NEW)
+endif()
+
+include_directories(${CMAKE_SOURCE_DIR})
+
+set (libPathFitter_SRCS
+    PathFitter.h
+    PathFitter.cpp
+    PathFitter-impl.cpp
+    OsgPathFitter.h
+    OsgPathFitter.cpp
+)
+
+add_library(libPathFitter
+    STATIC ${libPathFitter_SRCS}
+)
+
+target_link_libraries( libPathFitter
+    ${QT_LIBRARIES}
+    ${OPENSCENEGRAPH_LIBRARIES}
+)
