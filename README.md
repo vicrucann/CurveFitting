@@ -14,7 +14,7 @@ Use the `OsgPathFitter` class or derive your own using the base `PathFitter`.
 
 ## Sub-classing the `PathFitter`
 
-The `PathFitter` is a template abstract base class. Which means, you have to sub-class it and provide your own implementation for those functions. The list of functions and their behaviour is described in the following sub-sections.
+The `PathFitter` is a template abstract base class. Which means, you have to sub-class it and provide your own implementation for the pure virtual functions. The list of functions and their expected behaviour is described in the following sub-sections.
 
 #### Constructor
 
@@ -49,6 +49,22 @@ In your custom class, it is necessary to provide template definitions. As it was
 
 The `PathFitter` class must also contain the full definition to avoid the **LNK2019**, *Unresolved external symbol*. For this purpose, we prepared a file called `PathFitter-impl.cpp` that is to contain such definitions. Note we use the separate file simple for convenience reasons so that do not add custom definitions into the `PathFitter` abstract class.
 
+# Usage of `LibPathFitter` in an external project
+
+The `PathFitter` and its derivatives and compiled into a library `libPathFitter` so that to be easily used from an external project. In this case, you will only need to modify your project's corresponding `CMakeLists.txt` file. For example:
+
+```
+add_subdirectory(CurveFitting/libPathFitter)
+link_directories(${CMAKE_BINARY_DIR}/src/libNumerics/CurveFitting/libPathFitter)
+# ...
+target_link_libraries( libExternal
+    libPathFitter
+    ${QT_LIBRARIES}
+    ${OPENSCENEGRAPH_LIBRARIES}
+# ... any other libs
+)
+```
+For a live example, feel free to refer to [Cherish](https://github.com/vicrucann/cherish) project and its corresponding [`CMakeLists.txt`](https://github.com/vicrucann/cherish/blob/master/src/libNumerics/CMakeLists.txt).
 
 # Licence
 
