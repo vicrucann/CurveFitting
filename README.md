@@ -14,11 +14,11 @@ Use the `OsgPathFitter` class or derive your own using the base `PathFitter`.
 
 ## Sub-classing the `PathFitter`
 
-The `PathFitter` is a template abstract base class. Which means, you have to sub-class it and provide your own implementation for those functions. The list of functions and their behaviour is descrubed in the following sub-sections.
+The `PathFitter` is a template abstract base class. Which means, you have to sub-class it and provide your own implementation for those functions. The list of functions and their behaviour is described in the following sub-sections.
 
-#### Contructor
+#### Constructor
 
-The constructor does not require any implementaion, but it requires to provide a list of arguments for the used templates. In the case of `OsgPathFitter`, the template arguments are:
+The constructor does not require any implementation, but it requires to provide a list of arguments for the used templates. In the case of `OsgPathFitter`, the template arguments are:
 
 * `osg::Vec3Array` is a vector of a 3D component. In the base class it has a template name `Container`.
 * `osg::Vec3f` is a 3D/2D component of type `float`, i.e., given the above `Container = Vec3Array(Vec3f, Vec3f, ...)`. In the base class the template has a name `Point2D`.
@@ -45,9 +45,9 @@ Must return a `Point2D` with initialized values of `NAN` (from `math.h`).
 
 #### Template definitions
 
-In your custom class, it is necessary to provide template definitions. As it was mentioned above, you provide the definitions in the custom contructor. The full definitions must be provided at the end of  your `.cpp` implementation file of the custom path fitter class.
+In your custom class, it is necessary to provide template definitions. As it was mentioned above, you provide the definitions in the custom constructor. The full definitions must be provided at the end of  your `.cpp` implementation file of the custom path fitter class.
 
-The `PathFitter` class must also contain the full defition to avoid the **LNK2019**, *Unresolved external symbol*. For this purpose, we prepared a file called `PathFitter-impl.cpp` that is to contain such definitions. Note we use the separate file simple for convinience reasons so that do not add custom definitions into the `PathFitter` abstract class.
+The `PathFitter` class must also contain the full definition to avoid the **LNK2019**, *Unresolved external symbol*. For this purpose, we prepared a file called `PathFitter-impl.cpp` that is to contain such definitions. Note we use the separate file simple for convenience reasons so that do not add custom definitions into the `PathFitter` abstract class.
 
 
 # Licence
