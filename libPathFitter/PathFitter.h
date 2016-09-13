@@ -5,6 +5,15 @@
  * Is a pure virtual class which performs curve fitting based on the paper (with minor modifications):
  * An Algorithm for Automatically Fitting Digitized Curves, Philip J. Schneider
  * "Graphics Gems", Academic Press, 1990
+ *
+ * Usage:
+ * \code
+ *
+ * XPathFitter<Container, Point2D, Real> fitter;
+ * fitter.init(*path);
+ * smart_ptr<Container> curves = fitter.fit(threshold);
+ *
+ * \endcode
  */
 
 #include <osg/Array>
@@ -15,11 +24,21 @@ class PathFitter
 public:
     typedef std::vector<Point2> Curve; /*!< Curve is a vector of 2d points */
 
+    /*! Constructor */
     PathFitter();
+
+    /*! Performs copying od provided data in internal variable for easy of manupulation in the future.
+     * \param path is the set of points to copy from. */
     void init(const Container& path);
+
+    /*! The main loop method that performs the curve fitting within the given threshold. */
     virtual Container* fit(Real error = 2.5) = 0;
 
+    /*! \param index is the index of point
+     * \return point at the given index. */
     Point2 curveAt(unsigned int index) const;
+
+    /*! \return the number of points in a path */
     size_t getLength() const;
 
 protected:
@@ -56,7 +75,7 @@ private:
     std::pair<Real,int> findMaxError(int first, int last, const Curve& bezier, const std::vector<Real> &u);
 
 private:
-    Curve m_dataPoints;
+    Curve m_dataPoints; /*!< Data points provided by user to which the curve fit will be performed. */
 };
 
 #endif // PATHFITTER_H

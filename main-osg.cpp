@@ -1,9 +1,8 @@
 #include <Windows.h>
 
 #include "math.h"
-
-#include <QtGlobal>
-#include <QDebug>
+#include "assert.h"
+#include <iostream>
 
 #include <osg/Drawable>
 #include <osg/Geode>
@@ -22,7 +21,7 @@ const int OSG_HEIGHT = 960;
 osg::Vec3Array* drawCurves(osg::Vec3Array* curves, int samples = 11)
 {
     osg::ref_ptr<osg::Vec3Array> sampled = new osg::Vec3Array;
-    Q_ASSERT(curves->size() % 4 == 0);
+    assert(curves->size() % 4 == 0);
     int nCurves = curves->size() / 4;
 
     auto delta = 1.f / float(samples);
@@ -46,7 +45,7 @@ osg::Vec3Array* drawCurves(osg::Vec3Array* curves, int samples = 11)
             sampled->push_back(Bt);
         }
     }
-    Q_ASSERT(sampled->size() == (samples+1)*nCurves);
+    assert(sampled->size() == (samples+1)*nCurves);
     return sampled.release();
 }
 
@@ -76,8 +75,8 @@ osg::Node* createTestScene()
     osg::ref_ptr<osg::Vec3Array> curves = fitter.fit(tolerance);
 
     osg::ref_ptr<osg::Vec3Array> sampled = drawCurves(curves.get(), 15);
-    qDebug() << "path.segments=" << path->size()/4;
-    qDebug() << "curves.segments=" << curves->size()/4;
+    std::cout << "path.segments=" << path->size()/4 << std::endl;
+    std::cout << "curves.segments=" << curves->size()/4 << std::endl;
 
     osg::Vec4Array* colors = new osg::Vec4Array;
     colors->push_back(osg::Vec4(0.3,0.9,0,1));
