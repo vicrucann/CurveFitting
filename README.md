@@ -75,3 +75,7 @@ See the corresponding [licence file](https://github.com/vicrucann/CurveFitting/b
 On the image, 60 sampled curve (red color) is represented by a 1 cubic bezier curve (green color).
 
 ![Screenshot](https://github.com/vicrucann/CurveFitting/blob/master/screenshots/curvefit.png)
+
+Another example that includes 3 curves representing 180 sampled path.
+
+![Screenshot](https://github.com/vicrucann/CurveFitting/blob/master/screenshots/curvefit-2.png)
