@@ -1,4 +1,6 @@
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 #include "math.h"
 #include "assert.h"
@@ -13,10 +15,12 @@
 #include <osg/LineWidth>
 #include <osg/BlendFunc>
 
+//#ifdef USE_OPENSCENEGRAPH
 #include "libPathFitter/OsgPathFitter.h"
+//#endif
 
-const int OSG_WIDTH = 1280;
-const int OSG_HEIGHT = 960;
+const int WIN_WIDTH = 1280;
+const int WIN_HEIGHT = 960;
 
 osg::Vec3Array* drawCurves(osg::Vec3Array* curves, int samples = 11)
 {
@@ -66,15 +70,18 @@ osg::Vec3Array* createDataPoints()
 osg::Node* createTestScene()
 {
     osg::ref_ptr<osg::Vec3Array> path = createDataPoints();
+//#ifdef USE_OPENSCENEGRAPH
     OsgPathFitter<osg::Vec3Array, osg::Vec3f, float> fitter;
+//#endif
     fitter.init(*path);
 
     /* threshold: prefer to set it automatically depending on size of bounding box
      * in order to avoid under- and over-fitting. Here, we will set it fixed */
     float tolerance = 1.f;
+//#ifdef USE_OPENSCENEGRAPH
     osg::ref_ptr<osg::Vec3Array> curves = fitter.fit(tolerance);
-
     osg::ref_ptr<osg::Vec3Array> sampled = drawCurves(curves.get(), 15);
+//#endif
     std::cout << "path.segments=" << path->size()/4 << std::endl;
     std::cout << "curves.segments=" << curves->size()/4 << std::endl;
 
@@ -114,7 +121,9 @@ osg::Node* createTestScene()
 
 int main(int, char**)
 {
+#ifdef _WIN32
     ::SetProcessDPIAware();
+#endif
 
     osgViewer::Viewer viewer;
 
@@ -122,6 +131,6 @@ int main(int, char**)
 
     root->addChild(createTestScene());
     viewer.setSceneData(root.get());
-    viewer.setUpViewInWindow(100,100,OSG_WIDTH, OSG_HEIGHT);
+    viewer.setUpViewInWindow(100,100,WIN_WIDTH, WIN_HEIGHT);
     return viewer.run();
 }
