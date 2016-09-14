@@ -4,11 +4,13 @@ project(curve_fit)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-option(USE_STL_DATA "Use stl as data container" ON)
-
 message("OpenSceneGraph is used for visualization. Searching for libraries...")
 find_package(OpenSceneGraph REQUIRED COMPONENTS osgViewer)
+
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS} )
+
+# OSG-based data class will be used
+add_definitions(-DUSE_OPENSCENEGRAPH=1)
 
 set(SOURCES
     main.cpp

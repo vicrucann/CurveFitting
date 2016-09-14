@@ -15,9 +15,9 @@
 #include <osg/LineWidth>
 #include <osg/BlendFunc>
 
-//#ifdef USE_OPENSCENEGRAPH
+#ifdef USE_OPENSCENEGRAPH
 #include "libPathFitter/OsgPathFitter.h"
-//#endif
+#endif
 
 const int WIN_WIDTH = 1280;
 const int WIN_HEIGHT = 960;
@@ -70,30 +70,32 @@ osg::Vec3Array* createDataPoints()
 osg::Node* createTestScene()
 {
     osg::ref_ptr<osg::Vec3Array> path = createDataPoints();
-//#ifdef USE_OPENSCENEGRAPH
+#ifdef USE_OPENSCENEGRAPH
     OsgPathFitter<osg::Vec3Array, osg::Vec3f, float> fitter;
-//#endif
     fitter.init(*path);
 
     /* threshold: prefer to set it automatically depending on size of bounding box
      * in order to avoid under- and over-fitting. Here, we will set it fixed */
     float tolerance = 1.f;
-//#ifdef USE_OPENSCENEGRAPH
     osg::ref_ptr<osg::Vec3Array> curves = fitter.fit(tolerance);
     osg::ref_ptr<osg::Vec3Array> sampled = drawCurves(curves.get(), 15);
-//#endif
+#endif
+
     std::cout << "path.segments=" << path->size()/4 << std::endl;
     std::cout << "curves.segments=" << curves->size()/4 << std::endl;
 
+    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
+    geom->addPrimitiveSet(new osg::DrawArrays(GL_LINE_STRIP, 0, sampled->size()));
+    geom->setVertexArray(sampled.get());
+
+    /* color data */
     osg::Vec4Array* colors = new osg::Vec4Array;
     colors->push_back(osg::Vec4(0.3,0.9,0,1));
     osg::Vec4Array* colorsGT = new osg::Vec4Array;
     colorsGT->push_back(osg::Vec4(1,0,0,1));
 
-    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
-    geom->addPrimitiveSet(new osg::DrawArrays(GL_LINE_STRIP, 0, sampled->size()));
     geom->setUseDisplayList(false);
-    geom->setVertexArray(sampled.get());
+
     geom->setColorArray(colors, osg::Array::BIND_OVERALL);
 
     osg::ref_ptr<osg::Geometry> geomGT = new osg::Geometry;
