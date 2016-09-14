@@ -13,23 +13,18 @@ set (libPathFitter_SRCS
     PathFitter.h
     PathFitter.cpp
     PathFitter-impl.cpp
-)
+    )
 
-if (OpenSceneGraph_FOUND) # or make an option to include your own class
-    message("Using OSG data")
-    set (libPathFitterImpl_SRCS
-        OsgPathFitter.h
-        OsgPathFitter.cpp
-        )
-    message("OpenSceneGraph-based data is used for curve fitting")
-    add_definitions(-DUSE_OPENSCENEGRAPH=1)
-endif()
+set (libPathFitterImpl_SRCS
+    OsgPathFitter.h
+    OsgPathFitter.cpp
+    )
 
 add_library(libPathFitter
     STATIC ${libPathFitter_SRCS}
-${libPathFitterImpl_SRCS}
-)
+    ${libPathFitterImpl_SRCS}
+    )
 
 target_link_libraries( libPathFitter
     ${OPENSCENEGRAPH_LIBRARIES}
-)
+    )

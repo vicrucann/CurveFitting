@@ -15,9 +15,7 @@
 #include <osg/LineWidth>
 #include <osg/BlendFunc>
 
-#ifdef USE_OPENSCENEGRAPH
 #include "libPathFitter/OsgPathFitter.h"
-#endif
 
 const int WIN_WIDTH = 1280;
 const int WIN_HEIGHT = 960;
@@ -70,7 +68,6 @@ osg::Vec3Array* createDataPoints()
 osg::Node* createTestScene()
 {
     osg::ref_ptr<osg::Vec3Array> path = createDataPoints();
-#ifdef USE_OPENSCENEGRAPH
     OsgPathFitter<osg::Vec3Array, osg::Vec3f, float> fitter;
     fitter.init(*path);
 
@@ -79,7 +76,6 @@ osg::Node* createTestScene()
     float tolerance = 1.f;
     osg::ref_ptr<osg::Vec3Array> curves = fitter.fit(tolerance);
     osg::ref_ptr<osg::Vec3Array> sampled = drawCurves(curves.get(), 15);
-#endif
 
     std::cout << "path.segments=" << path->size()/4 << std::endl;
     std::cout << "curves.segments=" << curves->size()/4 << std::endl;

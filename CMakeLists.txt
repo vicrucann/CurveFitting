@@ -9,9 +9,6 @@ find_package(OpenSceneGraph REQUIRED COMPONENTS osgViewer)
 
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS} )
 
-# OSG-based data class will be used
-add_definitions(-DUSE_OPENSCENEGRAPH=1)
-
 set(SOURCES
     main.cpp
     )

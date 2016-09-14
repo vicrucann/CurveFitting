@@ -2,7 +2,6 @@
 
 #include <math.h>
 #include <algorithm>
-#include <memory>
 
 template <typename Container, typename Point2, typename Real>
 PathFitter<Container, Point2, Real>::PathFitter()

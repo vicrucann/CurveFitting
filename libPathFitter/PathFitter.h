@@ -16,12 +16,7 @@
  * \endcode
  */
 
-#ifdef USE_OPENSCENEGRAPH
 #include <osg/Array>
-#endif
-
-#include <vector>
-#include <utility>
 
 template <typename Container, typename Point2, typename Real>
 class PathFitter
