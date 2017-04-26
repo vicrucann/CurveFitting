@@ -27,7 +27,7 @@ public:
     /*! Constructor */
     PathFitter();
 
-    /*! Performs copying od provided data in internal variable for easy of manupulation in the future.
+    /*! Performs copying of provided data in internal variable for easy of manupulation in the future.
      * \param path is the set of points to copy from. */
     void init(const Container& path);
 
