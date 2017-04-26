@@ -2,19 +2,17 @@
 
 A C++11-based class that performs curve fitting based on *An algorithm for automatically fitting digitized curves* by Philip J. Schneider which was published in *Graphics gems*, 1990. The algorithm is presented with minor modifications and improvements. 
 
-Although the algorithm is complete, the wrap-up project is still in development and may undergo some changes and improvements, e.g., an example of OpenGL-based visualization only will be added, as well as stl-based usage only (no Qt and OpenSceneGraph dependencies).
-
 # Requirements
 
 Currently the project requires installed OpenSceneGraph (>= 3.4.0) and C++11 compatible compiler. 
 
 # Curve fitter class
 
-Use the `OsgPathFitter` class or derive your own using the base `PathFitter`. 
+Use the `OsgPathFitter` class or derive your own using the base `PathFitter` class. 
 
 ## Sub-classing the `PathFitter`
 
-The `PathFitter` is a template abstract base class. Which means, you have to sub-class it and provide your own implementation for the pure virtual functions. The list of functions and their expected behaviour is described in the following sub-sections.
+The `PathFitter` is a template abstract class. Which means, you have to sub-class it and provide your own implementation for the pure virtual functions. The list of functions and their expected behaviour is described in the following sub-sections.
 
 #### Constructor
 
@@ -26,7 +24,7 @@ The constructor does not require any implementation, but it requires to provide 
 
 #### Method `fit()`
 
-It is the main loop method that launches the fitting algorithm. It is designed to be virtual and pure so that the user is able to manage the memory by smart pointers of their choice. In case of `OsgPathFitter`, we chose `osg::ref_ptr<>`.
+It is the main loop method that launches the fitting algorithm. It is designed to be re-implemented with usage of smart pointer of choice. In case of `OsgPathFitter`, we chose `osg::ref_ptr<>`.
 
 The main steps that are needed to be in the method are:
 
@@ -72,7 +70,7 @@ See the corresponding [licence file](https://github.com/vicrucann/CurveFitting/b
 
 # Examples
 
-On the image, 60 sampled curve (red color) is represented by a 1 cubic bezier curve (green color).
+On the image, 60 sampled curve (red color) is represented by a 1 cubic Bezier curve (green color).
 
 ![Screenshot](https://github.com/vicrucann/CurveFitting/blob/master/screenshots/curvefit.png)
 
